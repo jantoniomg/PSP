@@ -1,19 +1,23 @@
 package org.example.cronometro;
 
 import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.stage.Stage;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
-import javafx.stage.Stage;
 
 import java.io.*;
 
-public class ContadorTiempo extends Application {
 
+import java.io.IOException;
+
+public class ContadorTiempo extends Application {
+    private Scene scene;
     private TextField inputField;
+    private ProgressBar progressBar;
     private Label tiempoLabel;
     private Button iniciarButton;
     private Button cancelarButton;
@@ -21,13 +25,13 @@ public class ContadorTiempo extends Application {
     private Button cargarTiempoButton;
     private Button temaOscuroButton;
     private Button temaClaroButton;
-    private Scene scene;
+
     private int tiempoTotal;
     private int tiempoActual;
     private boolean contando;
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage primaryStage){
         primaryStage.setTitle("Contador de Tiempo");
 
         VBox root = new VBox(10);
@@ -36,18 +40,21 @@ public class ContadorTiempo extends Application {
 
         Label instruccionLabel = new Label("Introduce el tiempo en segundos:");
         inputField = new TextField();
-        tiempoLabel = new Label("Tiempo: 00:00:00");
+        progressBar = new ProgressBar(0);
+        progressBar.setPrefWidth(200);
+        tiempoLabel = new Label("Tiempo: 0 segundos");
         iniciarButton = new Button("Iniciar");
         cancelarButton = new Button("Cancelar");
         cancelarButton.setDisable(true);
+        iniciarButton.setOnAction(e -> iniciarContador());
+        cancelarButton.setOnAction(e -> cancelarContador());
 
-        // Botones para las funcionalidades adicionales
         guardarTiempoButton = new Button("Guardar Tiempo");
         cargarTiempoButton = new Button("Cargar Tiempo");
         temaOscuroButton = new Button("Tema Oscuro");
         temaClaroButton = new Button("Tema Claro");
 
-        root.getChildren().addAll(instruccionLabel, inputField, tiempoLabel,
+        root.getChildren().addAll(instruccionLabel, inputField, tiempoLabel,progressBar,
                 iniciarButton, cancelarButton, guardarTiempoButton, cargarTiempoButton, temaOscuroButton, temaClaroButton);
 
         iniciarButton.setOnAction(e -> iniciarContador());
@@ -57,9 +64,10 @@ public class ContadorTiempo extends Application {
         temaOscuroButton.setOnAction(e -> aplicarTemaOscuro());
         temaClaroButton.setOnAction(e -> aplicarTemaClaro());
 
-        scene = new Scene(root, 300, 350);
+        Scene scene = new Scene(root, 300, 250);
         primaryStage.setScene(scene);
         primaryStage.show();
+
     }
 
     private void iniciarContador() {
@@ -70,6 +78,7 @@ public class ContadorTiempo extends Application {
             }
             tiempoActual = 0;
             contando = true;
+            progressBar.setProgress(0);
             iniciarButton.setDisable(true);
             cancelarButton.setDisable(false);
             inputField.setDisable(true);
@@ -110,19 +119,17 @@ public class ContadorTiempo extends Application {
     }
 
     private void actualizarUI() {
-        int horas = tiempoActual / 3600;
-        int minutos = (tiempoActual % 3600) / 60;
-        int segundos = tiempoActual % 60;
-
-        String tiempoFormateado = String.format("%02d:%02d:%02d", horas, minutos, segundos);
-        tiempoLabel.setText("Tiempo: " + tiempoFormateado);
+        double progreso = (double) tiempoActual / tiempoTotal;
+        progressBar.setProgress(progreso);
+        tiempoLabel.setText("Tiempo: " + tiempoActual + " segundos");
     }
 
     private void reiniciarUI() {
         iniciarButton.setDisable(false);
         cancelarButton.setDisable(true);
         inputField.setDisable(false);
-        tiempoLabel.setText("Tiempo: 00:00:00");
+        progressBar.setProgress(0);
+        tiempoLabel.setText("Tiempo: 0 segundos");
     }
 
     private void guardarTiempoPredefinido() {
@@ -158,8 +165,8 @@ public class ContadorTiempo extends Application {
         scene.getStylesheets().add(getClass().getResource("tema_claro.css").toExternalForm());
     }
 
+
     public static void main(String[] args) {
-        launch(args);
+        launch();
     }
 }
-
